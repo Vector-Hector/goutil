@@ -3,62 +3,33 @@ package util
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"net/http"
 	"strconv"
 	"time"
 )
 
-func RequiredQueryCappedInt(c *gin.Context, name string, maxValue int) (int, bool) {
-	i, done := RequiredQueryInt(c, name)
-	if done {
-		return 0, true
-	}
+func RequiredQueryCappedInt(c *gin.Context, name string, maxValue int) int {
+	i := RequiredQueryInt(c, name)
 	if i > maxValue {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"data": "the maximum value of " + name + " is " + strconv.Itoa(maxValue),
-		})
-		return 0, true
+		PanicBadRequest("the maximum value of " + name + " is " + strconv.Itoa(maxValue))
 	}
-	return i, false
+	return i
 }
 
-func RequiredQueryInt(c *gin.Context, name string) (int, bool) {
-	str, done := RequiredQueryString(c, name)
-	if done {
-		return 0, true
-	}
+func RequiredQueryInt(c *gin.Context, name string) int {
+	str := RequiredQueryString(c, name)
 	i, err := strconv.Atoi(str)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"data": name + " has to be an int.",
-		})
-		return 0, true
+		PanicBadRequest(name + " has to be an int.")
 	}
-	return i, false
+	return i
 }
 
-func RequiredQueryString(c *gin.Context, name string) (string, bool) {
-	val := c.Query(name)
-	if val == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"data": name + " is not optional",
-		})
-		return "", true
-	}
-	return val, false
-}
-
-func OptionalQueryTime(c *gin.Context, name string, defaultValue time.Time) time.Time {
-	val := c.Query(name)
-	if val == "" {
+func OptionalQueryCappedInt(c *gin.Context, name string, defaultValue int, maxValue int) int {
+	i := OptionalQueryInt(c, name, defaultValue)
+	if i > maxValue {
 		return defaultValue
 	}
-	t, err := time.Parse(time.RFC3339, val)
-	if err != nil {
-		fmt.Println(err)
-		return defaultValue
-	}
-	return t
+	return i
 }
 
 func OptionalQueryInt(c *gin.Context, name string, defaultValue int) int {
@@ -73,6 +44,14 @@ func OptionalQueryInt(c *gin.Context, name string, defaultValue int) int {
 	return i
 }
 
+func RequiredQueryString(c *gin.Context, name string) string {
+	val := c.Query(name)
+	if val == "" {
+		PanicBadRequest(name + " is not optional")
+	}
+	return val
+}
+
 func OptionalQueryString(c *gin.Context, name string, defaultValue string) string {
 	val := c.Query(name)
 	if val == "" {
@@ -81,3 +60,27 @@ func OptionalQueryString(c *gin.Context, name string, defaultValue string) strin
 	return val
 }
 
+func RequiredQueryTime(c *gin.Context, name string) time.Time {
+	val := c.Query(name)
+	if val == "" {
+		PanicBadRequest(name + " is not optional")
+	}
+	t, err := time.Parse(time.RFC3339, val)
+	if err != nil {
+		PanicBadRequest(name + " has to be of RFC3339 format.")
+	}
+	return t
+}
+
+func OptionalQueryTime(c *gin.Context, name string, defaultValue time.Time) time.Time {
+	val := c.Query(name)
+	if val == "" {
+		return defaultValue
+	}
+	t, err := time.Parse(time.RFC3339, val)
+	if err != nil {
+		fmt.Println(err)
+		return defaultValue
+	}
+	return t
+}
