@@ -4,7 +4,7 @@ import "os"
 
 func Mkdir(dir string) {
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		err := os.MkdirAll(dir, os.ModeDir)
+		err := os.MkdirAll(dir, os.ModePerm)
 		if err != nil {
 			panic(err)
 		}
