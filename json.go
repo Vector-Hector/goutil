@@ -6,19 +6,22 @@ import (
 )
 
 func PrintJSON(something interface{}) {
+	fmt.Println(GetJSON(something))
+}
+
+func GetJSON(something interface{}) string {
 	if IsRunByAWS() {
 		// log without intend
 		enc, err := json.Marshal(something)
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println(string(enc))
-		return
+		return string(enc)
 	}
-	
+
 	enc, err := json.MarshalIndent(something, "", "    ")
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(string(enc))
+	return string(enc)
 }

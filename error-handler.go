@@ -23,34 +23,34 @@ func (err HttpError) Error() string {
 func BadRequest(message ...interface{}) error {
 	return HttpError{
 		StatusCode: http.StatusBadRequest,
-		Message:    fmt.Sprintln(message),
+		Message:    fmt.Sprintln(message...),
 	}
 }
 
 func PanicBadRequest(message ...interface{}) {
-	panic(BadRequest(message))
+	panic(BadRequest(message...))
 }
 
 func InternalServerError(message ...interface{}) error {
 	return HttpError{
 		StatusCode: http.StatusInternalServerError,
-		Message:    fmt.Sprintln(message),
+		Message:    fmt.Sprintln(message...),
 	}
 }
 
 func PanicInternalServerError(message ...interface{}) {
-	panic(InternalServerError(message))
+	panic(InternalServerError(message...))
 }
 
 func NewHttpError(code int, message ...interface{}) error {
 	return HttpError{
 		StatusCode: code,
-		Message:    fmt.Sprintln(message),
+		Message:    fmt.Sprintln(message...),
 	}
 }
 
 func PanicHttp(code int, message ...interface{}) {
-	panic(NewHttpError(code, message))
+	panic(NewHttpError(code, message...))
 }
 
 func HandleErrors(c *gin.Context) {
